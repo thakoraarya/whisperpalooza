@@ -3,13 +3,10 @@ const messanger = require('../models/user');
 
 const router = express.Router();
 
-router.get('/allusers', (req, res) => {
-    res.send(user)
+router.get('/allusers', async (req, res) => {
+    const Messanger = await messanger.find({}, {name:1 ,email:1, _id: 0});
+    res.send(Messanger)
 })
-
-
-
-
 
 router.post('/newuser', async (req, res) => {
     console.log(req.body);
