@@ -3,9 +3,10 @@ const express = require('express');
 require('./db');
 var { expressjwt: jwt } = require("express-jwt");
 const jwks = require('jwks-rsa');
-// const axios = require('axios');
+const axios = require('axios');
 const cors = require('cors');
 const dotenv = require('dotenv');
+
 dotenv.config();
 
 const app = express();
@@ -21,24 +22,39 @@ app.use((req, res, next) => {
 });
 
 const verifyJWT = jwt({
-    secret: jwks.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: 'https://dev-3kdbhzzujbs1kvgj.us.auth0.com/.well-known/jwks.json',
-    }),
+    secret: 'aarya',
     audience: 'aarya',
     issuer: 'https://dev-3kdbhzzujbs1kvgj.us.auth0.com/',
     algorithms: ['RS256'],
-}).unless({ path: ['/'] });
+}).unless({ path: ['/', '/private'] });
 
 app.use(verifyJWT);
-app.use(express.static('public'));
+
 
 app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('Hello aarya!');
+});
+app.get('/private', async (req, res) => {
+    try {
+        const accessedToken = req.headers.authorization.split(' ')[1];
+        const response = await axios.get('https://dev-3kdbhzzujbs1kvgj.us.auth0.com/userinfo', {
+            headers:
+            {
+                Authorization: `Bearer ${accessedToken}`,
+            }
+        });
+
+
+        const userinfo = response.data.name;
+        console.log(userinfo);
+        res.send(userinfo)
+    } catch (error) {
+        console.log(error);
+    }
+
+    // res.send('private api');
 });
 
 app.use('/api', require('./router/auth'));

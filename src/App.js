@@ -19,13 +19,14 @@ function App() {
     const token = await getAccessTokenSilently();
     console.log(token);
 
-    const responce = await axios.get('http://localhost:4000/private', {
+    const response = await axios.get('http://localhost:4000/private', {
       headers:
       {
         Authorization: `Bearer ${token}`,
       }
     });
-    console.log(responce);
+    console.log(response);
+
   } catch (error) {
     console.log(error);
   }
