@@ -8,15 +8,21 @@ import { Auth0Provider } from '@auth0/auth0-react';
 // const dotenv = require('dotenv');
 // dotenv.config();
 
+// const DomainName = 'replace yourDomain name'
+// const ClientId = 'replace your client id'
 
-
-const DomainName = 'replace your Domain name'
-const ClientId = 'replace your client id'
+const DomainName = 'dev-3kdbhzzujbs1kvgj.us.auth0.com'
+const ClientId = 's2e0PW4iXDwha30ieQHxh7fITa5uINLz'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Auth0Provider domain={DomainName} clientId={ClientId} authorizationParams={{ redirect_uri: window.location.origin, }} >
+    <Auth0Provider
+      domain={DomainName}
+      clientId={ClientId}
+      audience='aarya'
+      scope= 'openid email profile'
+      authorizationParams={{ redirect_uri: window.location.origin, }} >
 
       <App />
 
