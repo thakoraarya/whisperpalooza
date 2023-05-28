@@ -1,83 +1,74 @@
 const express = require('express');
 const messanger = require('../models/user');
-
+const jwks = require('jwks-rsa');
+const axios = require('axios');
+const { verify } = require('jsonwebtoken');
 const router = express.Router();
+const verifyJWT = require('../middleware/jwtauth')
+
+router.post('/login', async (req, res) => {
+    try {
 
 
-
-try {
-    router.get('/private', (req, res) => {
-        res.json({
-            message: 'You have accessed a private endpoint!'
+        const accessedToken = req.headers.authorization.split(' ')[1];
+        console.log(accessedToken);
+        const response = await axios.get('https://dev-3kdbhzzujbs1kvgj.us.auth0.com/userinfo', {
+            headers:
+            {
+                Authorization: `Bearer ${accessedToken}`,
+            }
         });
-    });
-} catch (e) {
-    console.log(e);
-}
+
+        const userData = response.data;
+        console.log(userData);
 
 
-
-
-
-
-
-// get single user
-router.get('/singleuser', async (req, res) => {
-    const Messanger = await messanger.find({}, {name:1 ,email:1, _id: 0});
-    res.send(Messanger)
-})
-
-// get all users
-router.get('/allusers', (req, res) => {
-    messanger.findall()
-        .then((result) => {
-            res.send(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
-
-
-//add new user
-router.post('/newuser', async (req, res) => {
-    console.log(req.body);
-    const { name, email, password } = req.body;
-
-    // Check if user with the same email already exists
-    const existingUser = await messanger.findOne({ email, name });
-
-    if (existingUser) {
-        return res.status(409).send({ message: 'User already exists' });
+    } catch (error) {
+        console.log(error);
     }
-
-    const user = new messanger({
-        name,
-        email,
-        password
-    });
-
-    user.save()
-        .then(() => {
-            console.log(user);
-            res.send({ message: `welcome ${user.name}` });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).send({ message: 'Error creating user' });
-        });
 });
 
-// delete user
-router.delete('/deleteuser/:id', (req, res) => {
-    const id = req.params.id;
-    messanger.findByIdAndDelete(id)
-        .then((result) => {
-            res.send({ message: 'User deleted', result });
-        })
-        .catch((err) => {
-            console.log(err);
+router.post('/storeuser',verifyJWT, async (req, res) => {
+    try {
+        const { username, email, sub, picture, nickname } = req.body;
+
+        // Create a new user document in MongoDB
+        const newUser = new messanger({
+            username,
+            email,
+            sub,
+            picture,
+            nickname
         });
+
+        await newUser.save();
+        console.log(messanger.data);
+        console.log('New user data stored in MongoDB:', newUser);
+        res.sendStatus(200);
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
+
+
+router.get('/api/userdata', async (req, res) => {
+    try {
+        const { username } = req.user;
+
+        // Retrieve the user data from the database based on the username
+        const user = await messanger.findOne({ username });
+
+        if (user) {
+            res.send(user);
+        } else {
+            res.sendStatus(404);
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
 });
 
 

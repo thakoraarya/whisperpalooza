@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     name: {
         type: String,
         required: true,
@@ -11,16 +16,17 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    password: {
+    nickname: {
         type: String,
+        required: false,
+
+    },
+    picture: {
+        type: String,
+        // for now we are making it required
         required: true
     },
-    profile:{
-        type:String,
-        // for now we are not making it required
-        required: false
-    },
-    date: {
+    updated_at: {
         type: Date,
         default: Date.now
     },

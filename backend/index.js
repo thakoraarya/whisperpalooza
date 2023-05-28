@@ -1,9 +1,7 @@
 const express = require('express');
-// const user = require('./models/user');
 require('./db');
-var { expressjwt: jwt } = require("express-jwt");
-const jwks = require('jwks-rsa');
-const axios = require('axios');
+require('./router/auth')
+const verifyJWT = require('./middleware/jwtauth')
 const cors = require('cors');
 const dotenv = require('dotenv');
 
@@ -21,41 +19,15 @@ app.use((req, res, next) => {
     next();
 });
 
-const verifyJWT = jwt({
-    secret: 'aarya',
-    audience: 'aarya',
-    issuer: 'https://dev-3kdbhzzujbs1kvgj.us.auth0.com/',
-    algorithms: ['RS256'],
-}).unless({ path: ['/', '/private'] });
+
 
 app.use(verifyJWT);
-
-
 app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('Hello aarya!');
 });
-app.get('/private', async (req, res) => {
-    try {
-        const accessedToken = req.headers.authorization.split(' ')[1];
-        const response = await axios.get('https://dev-3kdbhzzujbs1kvgj.us.auth0.com/userinfo', {
-            headers:
-            {
-                Authorization: `Bearer ${accessedToken}`,
-            }
-        });
 
-
-        const userinfo = response.data.name;
-        console.log(userinfo);
-        res.send(userinfo)
-    } catch (error) {
-        console.log(error);
-    }
-
-    // res.send('private api');
-});
 
 app.use('/api', require('./router/auth'));
 
